@@ -1,0 +1,1 @@
+/Applications/MAMP/htdocs/ParksWebsiteNonSTatic/wp-content/plugins/query-monitor/wp-content/db.php
