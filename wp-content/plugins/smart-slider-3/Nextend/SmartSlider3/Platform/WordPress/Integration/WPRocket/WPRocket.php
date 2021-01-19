@@ -24,15 +24,13 @@ class WPRocket {
 
     public function init() {
 
-        if (version_compare(WP_ROCKET_VERSION, '3.7.1.1', '<=')) {
-            /**
-             * @see https://nextendweb.atlassian.net/browse/SSDEV-2335
-             */
-            add_filter('rocket_excluded_inline_js_content', array(
-                $this,
-                'remove_rocket_excluded_inline_js_content'
-            ));
-        }
+        /**
+         * @see https://nextendweb.atlassian.net/browse/SSDEV-2335
+         */
+        add_filter('rocket_excluded_inline_js_content', array(
+            $this,
+            'remove_rocket_excluded_inline_js_content'
+        ));
 
         /**
          * @see https://nextendweb.atlassian.net/browse/SSDEV-2434
