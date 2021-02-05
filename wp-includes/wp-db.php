@@ -61,7 +61,7 @@ class wpdb {
 	 * @since 0.71
 	 * @var bool
 	 */
-	public $show_errors = true;
+	public $show_errors = false;
 
 	/**
 	 * Whether to suppress errors during the DB bootstrapping. Default false.
