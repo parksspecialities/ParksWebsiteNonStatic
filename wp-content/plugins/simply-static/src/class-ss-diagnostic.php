@@ -25,13 +25,16 @@ class Diagnostic {
 	 * @var array
 	 */
 	protected $description = array(
-		'URLs' => array(),
+		'URLs' => array(
+			array( 'function' => 'is_ssl' )
+		),
 		'Filesystem' => array(
 			array( 'function' => 'is_temp_files_dir_readable' ),
 			array( 'function' => 'is_temp_files_dir_writeable' )
 		),
 		'WordPress' => array(
 			array( 'function' => 'is_permalink_structure_set' ),
+			array( 'function' => 'is_wp_cron_running' ),
 			array( 'function' => 'can_wp_make_requests_to_itself' )
 		),
 		'MySQL' => array(
@@ -44,6 +47,7 @@ class Diagnostic {
 		),
 		'PHP' => array(
 			array( 'function' => 'php_version' ),
+			array( 'function' => 'is_xml_active' ),
 			array( 'function' => 'has_curl' )
 		)
 	);
@@ -117,23 +121,22 @@ class Diagnostic {
 		);
 	}
 
+	public function is_ssl() {
+		return array(
+			'label' => esc_html__('Checking if website has an SSL certificate (HTTPS)', 'simply-static' ),
+			'test' => is_ssl()
+		);
+	}
+
 	public function is_additional_url_valid( $url ) {
-		$label = sprintf( __( 'Checking if Additional URL <code>%s</code> is valid', 'simply-static' ), $url );
-		if ( filter_var( $url, FILTER_VALIDATE_URL ) === false ) {
-			$test = false;
-			$message = __( 'Not a valid URL', 'simply-static' );
-		} else if ( ! Util::is_local_url( $url ) ) {
-			$test = false;
-			$message = __( 'Not a local URL', 'simply-static' );
-		} else {
-			$test = true;
-			$message = null;
-		}
+		$label    = sprintf( __( 'Checking if Additional URL <code>%s</code> is valid', 'simply-static' ), $url );
+		$response = Url_Fetcher::remote_get( $url );
+		$infos    = $this->check_error_from_response( $response );
 
 		return array(
-			'label' => $label,
-			'test' => $test,
-			'message' => $message
+			'label'   => $label,
+			'test'    => $infos['test'],
+			'message' => $infos['message']
 		);
 	}
 
@@ -165,34 +168,36 @@ class Diagnostic {
 		);
 	}
 
-	public function can_wp_make_requests_to_itself() {
-		$ip_address = getHostByName( getHostName() );
-		$label = sprintf( __( "Checking if WordPress can make requests to itself from <code>%s</code>", 'simply-static' ), $ip_address );
+	public function is_wp_cron_running() {
+		$label = __( 'Checking if WordPress cron is available and running', 'simply-static' );
 
-		$url = Util::origin_url();
-		$response = Url_Fetcher::remote_get( $url );
-
-		if ( is_wp_error( $response ) ) {
-			$test = false;
-			$message = null;
+		if ( ! defined( 'DISABLE_WP_CRON' ) || DISABLE_WP_CRON !== true ) {
+			$is_cron = true;
 		} else {
-			$code = $response['response']['code'];
-			if ( $code == 200 ) {
-				$test = true;
-				$message = $code;
-			} else if ( in_array( $code, Page::$processable_status_codes ) ) {
-				$test = false;
-				$message = sprintf( __( "Received a %s response. This might indicate a problem.", 'simply-static' ), $code );
-			} else {
-				$test = false;
-				$message = sprintf( __( "Received a %s response.", 'simply-static' ), $code );;
-			}
+			$is_cron = false;
 		}
-
 		return array(
 			'label' => $label,
-			'test' => $test,
-			'message' => $message
+			'test' => $is_cron,
+		);
+	}
+
+	/**
+	 * Check if WP can make requests.
+	 *
+	 * @return array
+	 */
+	public function can_wp_make_requests_to_itself() {
+		$ip_address = getHostByName( getHostName() );
+		$label      = sprintf( __( "Checking if WordPress can make requests to itself from <code>%s</code>", 'simply-static' ), $ip_address );
+		$url        = Util::origin_url(); $response = Url_Fetcher::remote_get( $url );
+
+		$infos = $this->check_error_from_response( $response );
+
+		return array(
+			'label'   => $label,
+			'test'    => $infos['test'],
+			'message' => $infos['message']
 		);
 	}
 
@@ -280,6 +285,15 @@ class Diagnostic {
 		);
 	}
 
+	public function is_xml_active() {
+		$label = __( 'Checking if php-xml is available', 'simply-static' );
+
+		return array(
+			'label' => $label,
+			'test' => extension_loaded( 'xml' ) ? 'OK' : 'MISSING',
+		);
+	}
+
 	public function has_curl() {
 		$label = __( 'Checking for cURL support', 'simply-static' );
 
@@ -299,4 +313,29 @@ class Diagnostic {
 		);
 	}
 
+	/**
+	 * Check status from response
+	 *
+	 * @param  array $response given response.
+	 * @return array
+	 */
+	public function check_error_from_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			$test = false; $message = sprintf( __( "Not a valid url.", 'simply-static' ));
+		} else {
+			$code = $response['response']['code'];
+
+			if ( $code == 200 ) {
+				$test    = true;
+				$message = $code;
+			} else if ( in_array( $code, Page::$processable_status_codes ) ) {
+				$test    = false;
+				$message = sprintf( __( "Received a %s response. This might indicate a problem.", 'simply-static' ), $code );
+			} else {
+				$test    = false;
+				$message = sprintf( __( "Received a %s response.", 'simply-static' ), $code );
+			}
+		}
+		return array( "test" => $test, 'message' => $message );
+	}
 }

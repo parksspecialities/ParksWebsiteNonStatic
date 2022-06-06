@@ -5,8 +5,10 @@ namespace Nextend\SmartSlider3\Renderable\Item\Text;
 
 
 use Nextend\Framework\Platform\Platform;
+use Nextend\Framework\Sanitize;
 use Nextend\Framework\View\Html;
 use Nextend\SmartSlider3\Renderable\Item\AbstractItemFrontend;
+use function Nextend\Framework\Sanitize;
 
 class ItemTextFrontend extends AbstractItemFrontend {
 
@@ -35,9 +37,9 @@ class ItemTextFrontend extends AbstractItemFrontend {
             '<p>',
             '</p>'
         ), array(
-            '<' . $tagName . ' class="' . $font . ' ' . $style . ' n2-ow">',
+            '<' . $tagName . ' class="' . $font . ' ' . $style . ' ">',
             '</' . $tagName . '>'
-        ), $this->wpautop($this->closeTags($owner->fill($this->data->get('content', '')))));
+        ), $this->wpautop(Sanitize::filter_allowed_html($this->closeTags($owner->fill($this->data->get('content', ''))), '<p>')));
 
         $class = '';
 
@@ -45,61 +47,64 @@ class ItemTextFrontend extends AbstractItemFrontend {
         if ($this->data->get('content-mobile-enabled')) {
             $hasMobile = true;
             $html      .= Html::tag('div', array(
-                'class' => 'n2-ss-hide-desktopportrait n2-ss-hide-desktoplandscape n2-ss-hide-tabletportrait n2-ss-hide-tabletlandscape n2-ow n2-ow-all'
+                'data-hide-desktoplandscape' => 1,
+                'data-hide-desktopportrait'  => 1,
+                'data-hide-tabletlandscape'  => 1,
+                'data-hide-tabletportrait'   => 1
             ), str_replace(array(
                 '<p>',
                 '</p>'
             ), array(
-                '<' . $tagName . ' class="' . $font . ' ' . $style . ' n2-ow">',
+                '<' . $tagName . ' class="' . $font . ' ' . $style . ' ">',
                 '</' . $tagName . '>'
-            ), $this->wpautop($this->closeTags($owner->fill($this->data->get('contentmobile', ''))))));
+            ), $this->wpautop(Sanitize::filter_allowed_html($this->closeTags($owner->fill($this->data->get('contentmobile', ''))), '<p>'))));
         }
 
         $hasTablet = false;
         if ($this->data->get('content-tablet-enabled')) {
             $hasTablet = true;
 
-            $classes = array(
-                'n2-ss-hide-desktopportrait',
-                'n2-ss-hide-desktoplandscape'
+            $attributes = array(
+                'class'                      => $class,
+                'data-hide-desktoplandscape' => 1,
+                'data-hide-desktopportrait'  => 1,
             );
 
             if ($hasMobile) {
-                $classes[] = 'n2-ss-hide-mobileportrait';
-                $classes[] = 'n2-ss-hide-mobilelandscape';
+                $attributes['data-hide-mobilelandscape'] = 1;
+                $attributes['data-hide-mobileportrait']  = 1;
             } else {
                 $hasMobile = true;
             }
 
-            $html  .= Html::tag('div', array(
-                'class' => implode(' ', $classes) . ' n2-ow-all' . $class
-            ), str_replace(array(
+            $html  .= Html::tag('div', $attributes, str_replace(array(
                 '<p>',
                 '</p>'
             ), array(
-                '<' . $tagName . ' class="' . $font . ' ' . $style . ' n2-ow">',
+                '<' . $tagName . ' class="' . $font . ' ' . $style . '">',
                 '</' . $tagName . '>'
-            ), $this->wpautop($this->closeTags($owner->fill($this->data->get('contenttablet', ''))))));
+            ), $this->wpautop(Sanitize::filter_allowed_html($this->closeTags($owner->fill($this->data->get('contenttablet', '')))), '<p>')));
             $class = '';
         }
 
-        $classes = array();
+
+        $attributes = array(
+            'class' => $class
+        );
 
         if ($hasMobile) {
-            $classes[] = 'n2-ss-hide-mobileportrait';
-            $classes[] = 'n2-ss-hide-mobilelandscape';
+            $attributes['data-hide-mobilelandscape'] = 1;
+            $attributes['data-hide-mobileportrait']  = 1;
         }
 
         if ($hasTablet) {
-            $classes[] = 'n2-ss-hide-tabletportrait';
-            $classes[] = 'n2-ss-hide-tabletlandscape';
+            $attributes['data-hide-tabletlandscape'] = 1;
+            $attributes['data-hide-tabletportrait']  = 1;
         }
-        $html .= Html::tag('div', array(
-            'class' => implode(' ', $classes) . ' n2-ow n2-ow-all' . $class
-        ), $content);
+        $html .= Html::tag('div', $attributes, $content);
 
         return Html::tag('div', array(
-            'class' => 'n2-ss-item-content n2-ow'
+            'class' => 'n2-ss-item-content n2-ss-text n2-ow-all'
         ), $html);
     }
 

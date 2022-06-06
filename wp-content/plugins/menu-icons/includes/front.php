@@ -141,9 +141,23 @@ final class Menu_Icons_Front_End {
 	 * @link    http://codex.wordpress.org/Plugin_API/Action_Reference/wp_enqueue_scripts
 	 */
 	public static function _enqueue_styles() {
+		// Deregister icon picker plugin font-awesome style and re-register with the new handler to avoid other plugin/theme style handler conflict.
+		$wp_styles = wp_styles();
+		if ( $wp_styles && isset( $wp_styles->registered['font-awesome'] ) ) {
+			$registered = $wp_styles->registered['font-awesome'];
+			if ( strpos( $registered->src, Menu_Icons::get( 'url' ) ) !== false ) {
+				$wp_styles->remove( 'font-awesome' );
+				$wp_styles->add( 'menu-icon-' . $registered->handle, $registered->src, $registered->deps, $registered->ver, $registered->args );
+			}
+		}
+
 		foreach ( self::$icon_types as $type ) {
-			if ( wp_style_is( $type->stylesheet_id, 'registered' ) ) {
-				wp_enqueue_style( $type->stylesheet_id );
+			$stylesheet_id = $type->stylesheet_id;
+			if ( 'font-awesome' === $stylesheet_id ) {
+				$stylesheet_id = 'menu-icon-' . $stylesheet_id;
+			}
+			if ( wp_style_is( $stylesheet_id, 'registered' ) ) {
+				wp_enqueue_style( $stylesheet_id );
 			}
 		}
 
@@ -181,6 +195,8 @@ final class Menu_Icons_Front_End {
 	 */
 	public static function _add_menu_item_title_filter( $args ) {
 		add_filter( 'the_title', array( __CLASS__, '_add_icon' ), 999, 2 );
+		add_filter( 'megamenu_the_title', array( __CLASS__, '_add_icon' ), 999, 2 );
+		add_filter( 'megamenu_nav_menu_css_class', array( __CLASS__, '_add_menu_item_class' ), 10, 3 );
 
 		return $args;
 	}
@@ -199,7 +215,8 @@ final class Menu_Icons_Front_End {
 	 */
 	public static function _remove_menu_item_title_filter( $nav_menu ) {
 		remove_filter( 'the_title', array( __CLASS__, '_add_icon' ), 999, 2 );
-
+		remove_filter( 'megamenu_the_title', array( __CLASS__, '_add_icon' ), 999, 2 );
+		remove_filter( 'megamenu_nav_menu_css_class', array( __CLASS__, '_add_menu_item_class' ), 10, 3 );
 		return $nav_menu;
 	}
 
@@ -380,9 +397,24 @@ final class Menu_Icons_Front_End {
 	 * @return string
 	 */
 	public static function get_font_icon( $meta ) {
-		$classes = sprintf( '%s %s %s', self::get_icon_classes( $meta ), $meta['type'], $meta['icon'] );
-		$style   = self::get_icon_style( $meta, array( 'font_size', 'vertical_align' ) );
+		$type = $meta['type'];
+		$icon = $meta['icon'];
 
+		$font_awesome5 = font_awesome5_backward_compatible();
+		if ( ! empty( $type ) && 'fa' === $type ) {
+			$icon    = explode( ' ', $icon );
+			$type    = reset( $icon );
+			$icon    = end( $icon );
+			$fa_icon = sprintf( '%s-%s', $type, $icon );
+			if ( array_key_exists( $fa_icon, $font_awesome5 ) ) {
+				$fa5_icon  = $font_awesome5[ $fa_icon ];
+				$fa5_class = explode( ' ', $fa5_icon );
+				$type      = reset( $fa5_class );
+				$icon      = end( $fa5_class );
+			}
+		}
+		$classes = sprintf( '%s %s %s', self::get_icon_classes( $meta ), $type, $icon );
+		$style   = self::get_icon_style( $meta, array( 'font_size', 'vertical_align' ) );
 		return sprintf( '<i class="%s" aria-hidden="true"%s></i>', esc_attr( $classes ), $style );
 	}
 
@@ -420,11 +452,62 @@ final class Menu_Icons_Front_End {
 		$classes = sprintf( '%s _svg', self::get_icon_classes( $meta ) );
 		$style   = self::get_icon_style( $meta, array( 'svg_width', 'vertical_align' ) );
 
+		$svg_icon = esc_url( wp_get_attachment_url( $meta['icon'] ) );
+		$width  = '';
+		$height = '';
+		if ( 'image/svg+xml' === get_post_mime_type( $meta['icon'] ) ) {
+
+			// Check `WP_Filesystem` function exists OR not.
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			\WP_Filesystem();
+			global $wp_filesystem;
+
+			$svg_icon = get_attached_file( $meta['icon'] );
+			$svg_icon_content = $wp_filesystem->get_contents( $svg_icon );
+			if ( $svg_icon_content ) {
+				$xmlget = simplexml_load_string( $svg_icon_content );
+				$xmlattributes = $xmlget->attributes();
+				$width  = (string) $xmlattributes->width;
+				$width  = (int) filter_var( $xmlattributes->width, FILTER_SANITIZE_NUMBER_INT );
+				$height = (string) $xmlattributes->height;
+				$height = (int) filter_var( $xmlattributes->height, FILTER_SANITIZE_NUMBER_INT );
+			}
+		} else {
+			$attachment_meta = wp_get_attachment_metadata( $meta['icon'] );
+			if ( $attachment_meta ) {
+				$width = isset( $attachment_meta['width'] ) ? $attachment_meta['width'] : $width;
+				$height = isset( $attachment_meta['height'] ) ? $attachment_meta['height'] : $height;
+			}
+		}
+		if ( ! empty( $width ) ) {
+			$width = sprintf( ' width="%dpx"', $width );
+		}
+		if ( ! empty( $height ) ) {
+			$height = sprintf( ' height="%dpx"', $height );
+		}
+		$image_alt = get_post_meta( $meta['icon'], '_wp_attachment_image_alt', true );
+		$image_alt = $image_alt ? wp_strip_all_tags( $image_alt ) : '';
 		return sprintf(
-			'<img src="%s" class="%s" aria-hidden="true"%s />',
+			'<img src="%s" class="%s" aria-hidden="true" alt="%s"%s%s%s/>',
 			esc_url( wp_get_attachment_url( $meta['icon'] ) ),
 			esc_attr( $classes ),
+			$image_alt,
+			$width,
+			$height,
 			$style
 		);
+	}
+
+	/**
+	 * Add menu item class in `Max Mega Menu` item.
+	 *
+	 * @param array  $classes Item classes.
+	 * @param array  $item WP menu item.
+	 * @param object $args Menu object.
+	 * @return array
+	 */
+	public static function _add_menu_item_class( $classes, $item, $args ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+		$classes[] = 'menu-item';
+		return $classes;
 	}
 }

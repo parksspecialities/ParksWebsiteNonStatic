@@ -1,5 +1,36 @@
+##### [Version 0.12.12](https://github.com/codeinwp/wp-menu-icons/compare/v0.12.11...v0.12.12) (2022-05-27)
 
- ### v0.12.5 - 2020-08-18 
+- Fix the style handler conflict issue which breaks the arrow icon of the submenus on some themes
+- Fix dismiss dashboard notice issue on some edge cases
+- Fix compatibility with the Max Mega Menu plugin
+
+##### [Version 0.12.11](https://github.com/codeinwp/wp-menu-icons/compare/v0.12.10...v0.12.11) (2022-03-16)
+
+Add font awesome 5 support
+Enhance compatibility with Otter/Neve
+
+##### [Version 0.12.10](https://github.com/codeinwp/wp-menu-icons/compare/v0.12.9...v0.12.10) (2022-02-07)
+
+- [Fix] Add support for alt attribute for SVG icons
+- Tested up with WordPress 5.9
+
+##### [Version 0.12.9](https://github.com/codeinwp/wp-menu-icons/compare/v0.12.8...v0.12.9) (2021-08-04)
+
+* Tested compatibility with WordPress 5.8
+
+##### [Version 0.12.8](https://github.com/codeinwp/wp-menu-icons/compare/v0.12.7...v0.12.8) (2021-05-12)
+
+* Fix issue when the image is not accessible to fetch the width/height metadata.
+
+##### [Version 0.12.7](https://github.com/codeinwp/wp-menu-icons/compare/v0.12.6...v0.12.7) (2021-05-07)
+
+Fix PHP fatal error when uploading SVG with the image uploader
+
+##### [Version 0.12.6](https://github.com/codeinwp/wp-menu-icons/compare/v0.12.5...v0.12.6) (2021-05-05)
+
+* Adds explicit width/height to icons to prevent layout shifts issues
+
+### v0.12.5 - 2020-08-18 
  **Changes:** 
   
  ### v0.12.4 - 2020-07-13 
@@ -46,4 +77,3 @@
  **Changes:** 
  * Change ownership to ThemeIsle.
 * Improves compatibility with various ThemeIsle products.
- 

@@ -4,8 +4,8 @@ Donate link: https://yoa.st/1up
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: SEO, XML sitemap, Content analysis, Readability, Schema
-Tested up to: 5.7
-Stable tag: 16.2
+Tested up to: 6.0
+Stable tag: 19.0
 Requires PHP: 5.6.20
 
 Improve your WordPress SEO: Write better content and have a fully optimized WordPress site using the Yoast SEO plugin.
@@ -42,16 +42,17 @@ We know content is king, that's why Yoast SEO is famous for its **state-of-the-a
 
 * **SEO analysis**: an invaluable tool while writing SEO-friendly content with the right (focus) keyphrases in mind.
 * **Readability analysis**: ensures that humans and search engines can read and understand your content.
-* **Full language support** for: English, German, French, Dutch, Spanish, Italian, Russian, Indonesian, Polish, Portuguese, Arabic, Swedish, Hebrew, Hungarian and Turkish.
+* **Full language support** for: English, German, French, Dutch, Spanish, Italian, Russian, Indonesian, Polish, Portuguese, Arabic, Swedish, Hebrew, Hungarian, Turkish, Czech, Norwegian, Slovak and Greek.
 * **A Google preview**, which shows what your listings will look like in the search results. Even on mobile devices!
 * **Innovative Schema blocks** for the WordPress block editor, so that your FAQ and HowTo content can be shown directly in the search results. Plus a breadcrumbs block to guide your users.
 * **[Premium] Internal linking blocks** to easily improve the structure of your content. Easily add a **table of contents block**, a **related links block**, a **subpages** block, or **siblings block**! Plus, we’ll keep adding these easy-to-add blocks to improve your site structure.
-* **[Premium]** Social previews to show you how your content will be shown on Twitter and Facebook.
+* **[Premium]** Social previews to show you how your content will be shown on Twitter and Facebook. Plus: Social Appearance Templates to guarantee a consistent look.
 * **[Premium]** The Insights tool that shows you what your text focuses on. This way you can keep your article in line with your keyphrases.
 * **[Premium]** Optimize your content for synonyms and related keyphrases.
 * **[Premium]** Optimize your article for different word forms of your keyphrases, as the singular and plural. But also different verb forms, synonyms, and related keyphrases. This makes for more natural content!
 * **[Premium]** Automatic internal linking suggestions: write your article and get automatic suggested posts to link to!
 * **[Premium]** An orphaned content filter to detect posts that have no links pointing towards them!
+* **[Premium]** SEO workouts to make working on your site as easy as ABC. These SEO workflows will get your site into shape in no time!
 
 #### KEEP YOUR SITE IN PERFECT SHAPE
 
@@ -108,6 +109,7 @@ Yoast SEO integrates seamlessly into a range of themes and plugins. We work part
 * The [Advanced Custom Fields](https://wordpress.org/plugins/advanced-custom-fields/) plugin, when you also activate the [ACF Content Analysis for Yoast SEO](https://wordpress.org/plugins/acf-content-analysis-for-yoast-seo/) plugin.
 * The [Elementor](https://wordpress.org/plugins/elementor/) website builder.
 * [Zapier](https://zapier.com/apps/yoast-seo/integrations), which helps you automate your publishing flow.
+* [Algolia](https://wordpress.org/plugins/wp-search-with-algolia/) integration to improve the quality of your site search.
 
 ### BUG REPORTS
 
@@ -124,7 +126,7 @@ Want more information on search engine optimization and Yoast SEO? Have a look a
 * Also follow Yoast on [Facebook](https://facebook.com/yoast), [Instagram](https://www.instagram.com/yoast/) & [Twitter](https://twitter.com/yoast).
 
 == Installation ==
-Starting with Yoast SEO consists of just two steps: installing and setting up the plugin. Yoast SEO is designed to work with your site’s specific needs, so don’t forget to go through the Yoast SEO configuration wizard as explained in the ‘after activation’ step!
+Starting with Yoast SEO consists of just two steps: installing and setting up the plugin. Yoast SEO is designed to work with your site’s specific needs, so don’t forget to go through the Yoast SEO first-time configuration as explained in the ‘after activation’ step!
 
 ### INSTALL YOAST SEO FROM WITHIN WORDPRESS
 
@@ -141,8 +143,8 @@ Starting with Yoast SEO consists of just two steps: installing and setting up th
 
 ### AFTER ACTIVATION
 
-1. You should see (a notice to start) the Yoast SEO configuration wizard;
-1. Go through the configuration wizard and set up the plugin for your site;
+1. You should see (a notice to start) the Yoast SEO first-time configuration;
+1. Go through this configuration and set up the plugin for your site;
 1. You’re done!
 
 == Frequently Asked Questions ==
@@ -234,61 +236,56 @@ Your question has most likely been answered on our help center: [yoast.com/help/
 
 == Changelog ==
 
-= 16.2 =
-Release Date: April 28th, 2021
+= 19.0 =
+Release Date: May 31st, 2022
 
-Say hi to Yoast SEO 16.2! This release focuses on improving stability and fixing several bugs. It also includes several enhancements. Read more about what’s new in Yoast SEO 16.2 in [our release post](https://yoa.st/release-16-2)!
+Say hi to Yoast SEO 19.0! This release helps make your sitemaps available to Bing, we've updated Yoast SEO to add your XML sitemap link(s) to your robots.txt file — if you want. Plus: we've fixed a couple of bugs with Elementor and our readability analyses. Happy updating! Read more about what's new in Yoast SEO 19.0 in [our release post in English](https://yoa.st/release-31-5-22) or [our release post in Spanish](https://yoa.st/release-31-5-22-spanish)!
 
 Enhancements:
 
-* Enables/disables auto-updates for the ACF Content Analysis for Yoast SEO plugin when auto-updates for Yoast SEO are enabled/disabled.
-* Improves the accessibility of the social sharing links in the post publish panel.
-* Changes the output of the `articleSection` and `keywords` attributes of the Article schema to an array instead of comma-separated values.
-* Improves the performance by optimizing the way `Article` schema is built, saving a query on pageload.
+* Following a change of policy by Bing, we now reference the XML sitemap in the robots.txt file to make it discoverable for search engines.
+* Changes `Disallow: /wp-admin/` to `Disallow:` in the default robots.txt file to follow our best-practice guide.
 
 Bugfixes:
 
-* Fixes a bug where saving posts containing URLs without protocol would fail or trigger warnings.
-* Fixes a bug where the current webpage would not always be referenced correctly in the breadcrumb schema output.
-* Fixes a bug where robots metadata were not returned when requesting metadata via our `get_head` REST route.
-* Fixes a bug where the primary term isn't saved at the right moment resulting in having an unexpected term for the breadcrumbs.
-* Fixes a bug where our add-ons would not automatically be updated if Yoast SEO was the first plugin for which the user ever enabled auto-updates.
+* Fixes a bug where an error in saving the Site representation step of the First-time configuration would not block the advancement to the next step.
+* Fixes a bug where editing an existing post created in the Block editor in Elementor would result in an analysis result discrepancy.
+* Fixes a bug where items in lists were not excluded for the readability assessment that checks whether consecutive sentences do not begin with the same words.
+* Fixes a bug where outdated information is shown in the First-time configuration Social profiles step
+* Fixes a bug where saving an invalid organization name in the First-time configuration would fail without feedback.
+* Fixes a bug where the schema would not be updated with the new logo when the user changed it via the First-time Configuration.
+* Fixes a bug where the titles of the steps in the First-time configuration would not be translated.
+* Fixes a bug where users would be able to leave a step containing errors by clicking another step's edit button.
 
 Other:
 
-* Adds the `'wpseo_enable_editor_features_' . $post_type` filter to allow users to show the Yoast SEO metabox on non-public post types if these are accessible. Props to [jondcampbell](https://github.com/jondcampbell).
+* Adds a Crawl settings tab in the General page with an upsell to Premium.
+* Adds a Redirects page with an upsell to Premium.
+* Deprecates the configuration workout classes.
+* Sets the WordPress tested up to version to 6.0.
 
-= 16.1.1 =
-Release Date: April 6th, 2021
+= 18.9 =
+Release Date: May 17th, 2022
 
-Bugfixes:
-
-* Fixes a bug where a fatal error would be thrown when creating a new Elementor template or editing an existing one.
-
-= 16.1 =
-Release Date: April 6th, 2021
-
-Yoast SEO 16.1 is out today! It features several enhancements and fixes that make the plugin chug along nicely. Happy updating! Read more about what’s new in Yoast SEO 16.1 in [our release post](https://yoa.st/release-16-1)!
+Yoast SEO 18.9 is out now! In this release, we have improved the first experience users have with the plugin. The first-time configuration takes users by the hand and guides them in properly setting everything up so that search engines understand their site. Make sure to run that first-time configuration to see if you’ve filled everything in correctly! Read more about what's new in Yoast SEO 18.9 in [our release post in English](https://yoa.st/release-17-5-22) or [our release post in Spanish](https://yoa.st/release-17-5-22-spanish)!
 
 Enhancements:
 
-* Improves the performance of the SEO data indexing process by optimizing the queries used for fetching unindexed objects.
-* Adds your OpenGraph or Twitter image as the main image in Schema when they're set.
-* Adds `contentUrl` to the schema image output.
-* Improves the performance of the post indexing. Props to [Ovidiu Liuta](https://github.com/ovidiul).
-* Improves the URL in the Google preview when in the desktop mode.
-* Improves the performance of loading the person & organization logo in Schema.
-* Improves the performance by optimizing several calls to WP path and basename functions by using already defined and calculated constants.
-* Removes the keyphrase highlighting in the mobile meta description to reflect new Google behavior.
+* Adds an `installation successful` page to welcome first-time users.
+* Introduces the First-time configuration, replacing and improving the Configuration Workout.
+* Renames the main admin menu item to `Yoast SEO` instead of `SEO`.
 
 Bugfixes:
 
-* Fixes a bug where the analysis highlight button would be visible in our Elementor integration even though we don't support it.
-* Fixes a bug where a warning was shown on the Features settings page when running the plugin on PHP 8.0.
-* Fixes a bug where a warning was shown on the Integrations settings page when running the plugin on PHP 8.0.
-* Fixes a bug where, on a multisite installation, enabling/disabling auto-updates for Yoast SEO would not automatically enable/disable auto-updates for Yoast SEO Premium and the other Yoast add-ons.
-* Fixes a bug where the breadcrumbs aren't updated properly when editing a post via the quick edit.
-* Fixes a bug where the rewrite rules would not always be flushed on plugin activation.
+* Fixes a bug that would lead to race conditions when using persistent object caching.
+* Fixes a bug where a 403 error page would be thrown when a user tried to access the old configuration wizard.
+* Fixes a bug where our How To and FAQ blocks would not handle focus correctly when using WordPress 6.0.
+* Fixes a bug where the global var $post is sometimes modified unexpectedly. Props to [grantalltodavid](https://github.com/grantalltodavid).
+
+Other:
+
+* Adds a `Premium` badge to the Workouts menu item.
+* Updates the look of the Accounts tab in the Social page.
 
 = Earlier versions =
 For the changelog of earlier versions, please refer to [the changelog on yoast.com](https://yoa.st/yoast-seo-changelog).

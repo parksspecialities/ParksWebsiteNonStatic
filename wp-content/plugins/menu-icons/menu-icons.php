@@ -11,7 +11,7 @@
  * Plugin name: Menu Icons
  * Plugin URI:  https://github.com/Codeinwp/wp-menu-icons
  * Description: Spice up your navigation menus with pretty icons, easily.
- * Version:     0.12.5
+ * Version:     0.12.12
  * Author:      ThemeIsle
  * Author URI:  https://themeisle.com
  * License:     GPLv2
@@ -27,7 +27,9 @@
  */
 final class Menu_Icons {
 
-	const VERSION = '0.12.5';
+	const DISMISS_NOTICE = 'menu-icons-dismiss-notice';
+
+	const VERSION = '0.12.12';
 
 	/**
 	 * Holds plugin data
@@ -89,7 +91,16 @@ final class Menu_Icons {
 
 		Menu_Icons_Meta::init();
 
+		// Font awesome 5 backward compatible functionalities.
+		require_once self::$data['dir'] . 'includes/library/font-awesome5/backward-compatible-icons.php';
+		require_once self::$data['dir'] . 'includes/library/font-awesome5/font-awesome.php';
+		Menu_Icons_Font_Awesome::init();
+
 		add_action( 'icon_picker_init', array( __CLASS__, '_init' ), 9 );
+
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, '_admin_enqueue_scripts' ) );
+		add_action( 'wp_dashboard_setup', array( __CLASS__, '_wp_menu_icons_dashboard_notice' ) );
+		add_action( 'admin_action_menu_icon_hide_notice', array( __CLASS__, 'wp_menu_icons_dismiss_dashboard_notice' ) );
 	}
 
 
@@ -150,6 +161,75 @@ final class Menu_Icons {
 		?>
 		<div class="error">
 			<p><?php esc_html_e( 'Looks like Menu Icons was installed via Composer. Please activate Icon Picker first.', 'menu-icons' ); ?></p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Register assets.
+	 */
+	public static function _admin_enqueue_scripts() {
+		$url    = self::get( 'url' );
+		$suffix = kucrut_get_script_suffix();
+
+		wp_register_style(
+			'menu-icons-dashboard',
+			"{$url}css/dashboard-notice{$suffix}.css",
+			false,
+			self::VERSION
+		);
+	}
+
+	/**
+	 * Render dashboard notice.
+	 */
+	public static function _wp_menu_icons_dashboard_notice() {
+		if ( false === get_transient( self::DISMISS_NOTICE ) ) {
+			wp_enqueue_style( 'menu-icons-dashboard' );
+			wp_enqueue_script( 'menu-icons-dashboard' );
+			add_action( 'admin_notices', array( __CLASS__, '_upsell_admin_notice' ) );
+		}
+	}
+
+	/**
+	 * Ajax request handle for dissmiss dashboard notice.
+	 */
+	public static function wp_menu_icons_dismiss_dashboard_notice() {
+		// Verify WP nonce and store hide notice flag.
+		if ( isset( $_GET['_wp_notice_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wp_notice_nonce'] ) ), self::DISMISS_NOTICE ) ) {
+			set_transient( self::DISMISS_NOTICE, 1, 365 * DAY_IN_SECONDS );
+		}
+
+		if ( ! headers_sent() ) {
+			wp_safe_redirect( admin_url() );
+			exit;
+		}
+	}
+
+	/**
+	 * Upsell admin notice.
+	 */
+	public static function _upsell_admin_notice() {
+		$neve_theme_url = add_query_arg(
+			array(
+				'theme' => 'neve',
+			),
+			admin_url( 'theme-install.php' )
+		);
+
+		$action_url = add_query_arg(
+			array(
+				'action'           => 'menu_icon_hide_notice',
+				'_wp_notice_nonce' => wp_create_nonce( self::DISMISS_NOTICE ),
+			),
+			admin_url( 'index.php' )
+		);
+		?>
+		<div class="notice notice-info menu-icon-dashboard-notice">
+			<h2><?php esc_html_e( 'Thank you for installing Menu Icons!', 'menu-icons' ); ?></h2>
+			<p><?php esc_html_e( 'Have you heard about our latest FREE theme - Neve? Using a mobile-first approach, compatibility with AMP and popular page-builders, Neve makes website building accessible for everyone.', 'menu-icons' ); ?></p>
+			<a href="<?php echo esc_url( $neve_theme_url ); ?>" class="button button-primary button-large"><?php esc_html_e( 'Preview Neve', 'menu-icons' ); ?></a>
+			<a href="<?php echo esc_url( $action_url ); ?>" class="notice-dismiss"></a>
 		</div>
 		<?php
 	}

@@ -33,7 +33,7 @@ class Util {
 	 * @return string home URL
 	 */
 	public static function origin_url() {
-		return home_url();
+		return apply_filters( 'ss_origin_url', home_url() );
 	}
 
 	/**
@@ -481,5 +481,4 @@ class Util {
 		);
 		return esc_url_raw( $url );
 	}
-
 }

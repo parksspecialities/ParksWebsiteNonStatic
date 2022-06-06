@@ -44,12 +44,11 @@ class Options {
 	 * Return an instance of Simply_Static\Options
 	 * @return Simply_Static
 	 */
-	public static function instance()
-	{
+	public static function instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 
-			$options = get_option( Plugin::SLUG );
+			$options = apply_filters( 'ss_get_options', get_option( Plugin::SLUG ) );
 			if ( false === $options ) {
 				$options = array();
 			}
@@ -82,11 +81,24 @@ class Options {
 
 	/**
 	 * Returns a value of the option identified by $name
+     *
+     * Also checks if option exists in wp-config.php, and uses it to override the database value
+     *
+     * Fore example:
+     * SIMPLY_STATIC_TEMP_FILES_DIR     in wp-config.php overrides temp_files_dir loaded from database
+     * SIMPLY_STATIC_DELIVERY_METHOD    in wp-config.php overrides delivery_method loaded from database
+     *
 	 * @param string $name The option name
 	 * @return mixed|null
 	 */
-	public function get( $name ) {
-		return array_key_exists( $name, $this->options ) ? $this->options[ $name ] : null;
+	public function get( $name = '' ) {
+        return array_key_exists( $name, $this->options ) ?
+            (
+                defined('SIMPLY_STATIC_' . strtoupper( $name ) ) ?
+                constant('SIMPLY_STATIC_' . strtoupper( $name ) ) :
+                $this->options[ $name ]
+            )
+            : null;
 	}
 
 	/**
@@ -124,7 +136,7 @@ class Options {
 	 * @return string The path to the temp static archive directory
 	 */
 	public function get_archive_dir() {
-		return Util::add_trailing_directory_separator( $this->get( 'temp_files_dir' ) . $this->get( 'archive_name' )  );
+		return Util::add_trailing_directory_separator( $this->get( 'temp_files_dir' ) . $this->get( 'archive_name' ) );
 	}
 
 	/**
